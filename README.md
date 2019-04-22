@@ -23,6 +23,6 @@ After the values are entered, you may export the final results to Excel.
 * Multi-Sheet export to Excel
 * Interactive Excel sheet export
 
-## contact
+## Contact
 
 Feel free to email me at angretlam@gmail.com with concerns or ideas.
