@@ -60,14 +60,40 @@
 		<!-- Main engine script for the SPA -->
 		<script>
 			// Create the data table for the management of the data
-			var dataTable = [];
+			var dataTable = {
+				configurationItems: {
+					data: [],
+					html: ''
+				},
+				configurationOne: {
+					data: [],
+					html: ''
+				},
+				configurationTwo: {
+					data: [],
+					html: ''
+				},
+				securityFirst: {
+					data: [],
+					html: ''
+				},
+				userFirst: {
+					data: [],
+					html: ''
+				},
+				operationsFirst: {
+					data: [],
+					html: ''
+				}
+			};
+
+			var mapArray = ['configurationOne', 'configurationTwo', 'securityFirst', 'userFirst', 'operationsFirst'];
 
 			// Create the basic data insertion thingy.
 			function addCI() {
 				// Create the array for the new value
 				// Always assume that the first value is enabled
 				var nuCI = [
-					1,
 					document.getElementById('ci').value,
 					document.getElementById('eSV').value,
 					document.getElementById('eUV').value,
@@ -78,7 +104,12 @@
 				];
 
 				// Add the data to the global variable
-				dataTable.push(nuCI);
+				dataTable["configurationItems"]["data"].push(nuCI);
+				dataTable["configurationOne"]["data"].push('1');
+				dataTable["configurationTwo"]["data"].push('1');
+				dataTable["securityFirst"]["data"].push(nuCI[1] >= nuCI[4]? 1 : 0);
+				dataTable["userFirst"]["data"].push(nuCI[2] >= nuCI[5]? 1 : 0);
+				dataTable["operationsFirst"]["data"].push(nuCI[3] >= nuCI[6]? 1 : 0);
 
 				// Rebuild the table data
 				buildTables();
@@ -101,75 +132,85 @@
 			// The buildTables function should iterate through all options and data tables to create single view
 			// The goal will be a tabular html view which is exportable to XLSX format
 			function buildTables() {
-				// Create a variable to stuff the HTML text into     
-				var htmlText = "<table class=\"table\" id='\webTable'\><tr><td>Decision Point</td><td>Enabled</td><td>Security Value</td><td>User Value</td><td>Operations Value</td>";
-				var dataText = "<table class=\"table\" id='\dataTable'\><tr><td>Decision Point</td><td>eSV</td><td>dSV</td><td>eUV</td><td>dUV</td><td>eOV</td><td>dOV</td>";
-			
-				// consolidate the row html
-				var dataRows = '';
-				var rawDataRows = '';
-				// get the SV, UV, and OV for averaging
-				var SV = [];
-				var UV = [];
-				var OV = [];
+				// Create the raw data table
+				// Insert the correct header for the data table
+				dataTable["configurationItems"]["html"] = "<table class=\"table\" id='\dataTable'\><tr><td>Decision Point</td><td>eSV</td><td>dSV</td><td>eUV</td><td>dUV</td><td>eOV</td><td>dOV</td>";
+				
+				// insert the configuration items to the data table
+				for (i = 0; i < dataTable["configurationItems"]["data"].length; i++) {
+					var ci = dataTable["configurationItems"]["data"][i]; 
+					dataTable["configurationItems"]["html"] = dataTable["configurationItems"]["html"] + '<tr><td>' + ci[0] + '</td><td>' + ci[1] + '</td><td>' + ci[2] + '</td><td>' + ci[3] + '</td><td>' + ci[4] + '</td><td>' + ci[5] + '</td><td>' + ci[6] + '</td></tr>';
+				}
 
-				// insert the data into the htmlText for the opinionated table
-				for (i = 0; i < dataTable.length; i++) {
-					var ci = dataTable[i];
-					var rowText = '';
+				// close the dataTable for configurationItems
+				dataTable["configurationItems"]["html"] += "</table>";
 
-					// If enabled, create a row with the enabled values and update the score arrays
-					if (ci[0] == 1) {
-						rowText = '<tr><td>' + ci[1] + '</td><td><select id="' + i + '" onChange="toggleCI(\'' + i + '\')"><option value="1"selected>Enabled</option><option value="0">Disabled</option></select></td><td>' + ci[2] + '</td><td>' + ci[3] + '</td><td>' + ci[4] + '</td></tr>';
-						SV.push(ci[2]);
-						UV.push(ci[3]);
-						OV.push(ci[4]);
-						// if disabled, create a row with the disabled values
-					} else {
-						rowText = '<tr><td>' + ci[1] + '</td><td><select id="' + i + '" onChange="toggleCI(\'' + i + '\')"><option value="1">Enabled</option><option value="0" selected>Disabled</option></select></td><td>' + ci[5] + '</td><td>' + ci[6] + '</td><td>' + ci[7] + '</td></tr>';
-						SV.push(ci[5]);
-						UV.push(ci[6]);
-						OV.push(ci[7]);
+				
+				//iterate through the map to complete the rest of the table
+				for (i=0; i < mapArray.length; i++) {
+					var selectedConfig = mapArray[i];
+
+					// Set the html for the current array
+					dataTable[selectedConfig]["html"] = "<table class=\"table\" id='\webTable'\><tr><td>Decision Point</td><td>Enabled</td><td>Security Value</td><td>User Value</td><td>Operations Value</td>";
+
+					// Set the variables for this array
+					var configRows = '';
+					var summaryRow = '';
+					var SV = [];
+					var UV = [];
+					var OV = [];
+
+					// insert the data into the current array HTML
+					for (s = 0; s < dataTable[selectedConfig]["data"].length; s++) {
+						var configSetting = dataTable[selectedConfig]["data"][s];
+						var configurationItem = dataTable["configurationItems"]["data"][s];
+
+						// If enabled, create a row with the enabled values and update the score arrays
+						if (configSetting == 1) {
+							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1" selected>Enabled</option><option value="0">Disabled</option></select></td><td>' + configurationItem[1] + '</td><td>' + configurationItem[2] + '</td><td>' + configurationItem[3] + '</td></tr>';
+							SV.push(configurationItem[1]);
+							UV.push(configurationItem[2]);
+							OV.push(configurationItem[3]);
+							// if disabled, create a row with the disabled values
+						} else {
+							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1">Enabled</option><option value="0" selected>Disabled</option></select></td><td>' + configurationItem[4] + '</td><td>' + configurationItem[5] + '</td><td>' + configurationItem[6] + '</td></tr>';
+							SV.push(configurationItem[4]);
+							UV.push(configurationItem[5]);
+							OV.push(configurationItem[6]);
+						}
 					}
+				
+					// Get averages for the S,U,and O values
+					var svAVG = getAverage(SV);
+					var uvAVG = getAverage(UV);
+					var ovAVG = getAverage(OV);
 
-					// Insert the data into dataText for the unopinionated table
-					rawDataText = '<tr><td>' + ci[1] + '</td><td>' + ci[2] + '</td><td>' + ci[3] + '</td><td>' + ci[4] + '</td><td>' + ci[5] + '</td><td>' + ci[6] + '</td><td>' + ci[7] + '</td></tr>';
+					// Create the summary row
+					var summaryRow = '<tr><th colspan="2">Summary</th><th>' + svAVG + '</th><th>' + uvAVG + '</th><th>' + ovAVG + '</th></tr>';
 
-					// Insert the updated row into the table
-					dataRows += rowText;
-					rawDataRows += rawDataText;
+					// Aggregate everything together
+					dataTable[selectedConfig]["html"] += summaryRow;
+					dataTable[selectedConfig]["html"] += configRows;
+					dataTable[selectedConfig]["html"] += "</table>";
 
 				}
 
-				// Get averages for the S,U,and O values
-				var svAVG = getAverage(SV);
-				var uvAVG = getAverage(UV);
-				var ovAVG = getAverage(OV);
-
-				// Create the summary row
-				var summaryRow = '<tr><th colspan="2">Summary</th><th>' + svAVG + '</th><th>' + uvAVG + '</th><th>' + ovAVG + '</th></tr>';
-
-				// Aggregate everything together
-				htmlText += summaryRow;
-				htmlText += dataRows;
-				htmlText += "</table>";
-
-				dataText += rawDataRows;
-				dataText += "</table>";
-
 				// Insert the tables into the DOM
-				document.getElementById('optionOneTable').innerHTML = htmlText;
-				document.getElementById('dataTable').innerHTML = dataText;
+				document.getElementById('configurationItemsTable').innerHTML = dataTable["configurationItems"]["html"];
+				document.getElementById('configurationOneTable').innerHTML = dataTable["configurationOne"]["html"];
+				document.getElementById('configurationTwoTable').innerHTML = dataTable["configurationTwo"]["html"];
+				document.getElementById('securityFirstTable').innerHTML = dataTable["securityFirst"]["html"];
+				document.getElementById('userFirstTable').innerHTML = dataTable["userFirst"]["html"];
+				document.getElementById('operationsFirstTable').innerHTML = dataTable["operationsFirst"]["html"];
 
 			}
 
-			function toggleCI(arrayID) {
-
+			function toggleCI(itemID, config) {
 				// Toggle the enabled bit
-				if (dataTable[arrayID][0] == 0) {
-					dataTable[arrayID][0] = 1;
+				if (dataTable[config]["data"][itemID] == 0) {
+					dataTable[config]["data"][itemID] = 1;
 				} else {
-					dataTable[arrayID][0] = 0;
+					dataTable[config]["data"][itemID] = 0;
 				}
 				// rebuild the table;
 				buildTables();
@@ -178,31 +219,41 @@
 			function toExcel() {
 				// Get the HTML table and covert to a work book
 				var wb = XLSX.utils.book_new();
-				var tbl = XLSX.utils.table_to_sheet(document.getElementById('webTable'));
-				var tbl2 = XLSX.utils.table_to_sheet(document.getElementById('dataTable'));
-				XLSX.utils.book_append_sheet(wb, tbl2, "Data");
-				XLSX.utils.book_append_sheet(wb, tbl, "Config 1");
-
-
-				// Access the first sheet of the work book
-				ws = wb.Sheets['Config 1'];
+				var ciWS = XLSX.utils.table_to_sheet(document.getElementById('configurationItemsTable'));
+				var cOneWS = XLSX.utils.table_to_sheet(document.getElementById('configurationOneTable'));
+				var cTwoWS = XLSX.utils.table_to_sheet(document.getElementById('configurationTwoTable'));
+				var cSWS = XLSX.utils.table_to_sheet(document.getElementById('securityFirstTable'));
+				var cUWS = XLSX.utils.table_to_sheet(document.getElementById('userFirstTable'));
+				var cOWS = XLSX.utils.table_to_sheet(document.getElementById('operationsFirstTable'));
+				XLSX.utils.book_append_sheet(wb, ciWS, "configurationItems");
+				XLSX.utils.book_append_sheet(wb, cOneWS, "configurationOne");
+				XLSX.utils.book_append_sheet(wb, cTwoWS, "configurationTwo");
+				XLSX.utils.book_append_sheet(wb, cSWS, "securityFirst");
+				XLSX.utils.book_append_sheet(wb, cUWS, "userFirst");
+				XLSX.utils.book_append_sheet(wb, cUWS, "operationsFirst");
 
 				// Update the enabled state for the spreadsheet
 				// Some variables for the column and starting row
 				var col = 'B';
 				var row = 3;
 
-				// For each item in the dataTable
-				for (i = 0; i < dataTable.length; i++) {
+				for (page = 0; page < mapArray.length; page++) {
 
-					// Assume disabled unless explicitly enabled
-					var state = 'Disabled';
-					if (dataTable[i][0] == 1) {
-						state = 'Enabled';
+					// Access the first sheet of the work book
+					var ws = wb.Sheets[mapArray[page]];
+
+					// For each item in the dataTable
+					for (i = 0; i < dataTable[mapArray[page]]["data"].length; i++) {
+
+						// Assume disabled unless explicitly enabled
+						var state = 'Disabled';
+						if (dataTable[mapArray[page]]["data"][i] == 1) {
+							state = 'Enabled';
+						}
+
+						// Update the worksheet with the new value
+						ws[(col + (row + i))] = { t: 's', v: state };
 					}
-
-					// Update the worksheet with the new value
-					ws[(col + (row + i))] = { t: 's', v: state };
 				}
 
 				XLSX.writeFile(wb, 'out.xlsb');
@@ -219,22 +270,22 @@
 					Decision Point
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Security value if enabled.">
-					eSV
+					Security Value enabled 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="User value if enabled.">
-					eUV
+					UserX Value enabled 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Operations value if enabled.">
-					eOV
+					Operations Value enabled 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Security value if disabled.">
-					dSV
+					Security Value disabled 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="User value if disabled.">
-					dUV
+					UserX Value disabled 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Operations value if disabled.">
-					dOV
+					Operations Value disabled 
 				</td>
 			</tr>
 			<tr>
@@ -301,13 +352,21 @@
 
 		<nav>
 			<div class="nav nav-tabs" id="nav-tab" role="tablist">
-				<a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#dataTable" role="tab" aria-controls="nav-home" aria-selected="true">Data</a>
-				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#optionOneTable" role="tab" aria-controls="nav-contact" aria-selected="false">Config 1</a>
+				<a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#configurationItemsTable" role="tab" aria-controls="nav-home" aria-selected="true">Data</a>
+				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#configurationOneTable" role="tab" aria-controls="nav-contact" aria-selected="false">Configuration One</a>
+				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#configurationTwoTable" role="tab" aria-controls="nav-contact" aria-selected="false">Configuration Two</a>
+				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#securityFirstTable" role="tab" aria-controls="nav-contact" aria-selected="false">Security First</a>
+				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#userFirstTable" role="tab" aria-controls="nav-contact" aria-selected="false">User First</a>
+				<a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#operationsFirstTable" role="tab" aria-controls="nav-contact" aria-selected="false">Operations One</a>
 			</div>
 		</nav>
 		<div class="tab-content" id="nav-tabContent">
-			<div class="tab-pane fade show active" id="dataTable" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
-			<div class="tab-pane fade" id="optionOneTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+			<div class="tab-pane fade show active" id="configurationItemsTable" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
+			<div class="tab-pane fade" id="configurationOneTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+			<div class="tab-pane fade" id="configurationTwoTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+			<div class="tab-pane fade" id="securityFirstTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+			<div class="tab-pane fade" id="userFirstTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+			<div class="tab-pane fade" id="operationsFirstTable" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
 		</div>
 
 	</main><!-- /.container -->
