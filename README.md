@@ -18,10 +18,10 @@ After the values are entered, you may export the final results to Excel.
 
 ## Upcoming features
 
-* Multiple Tabs to support decision comparisons
-* Off line local storage
-* Multi-Sheet export to Excel
-* Interactive Excel sheet export
+* Customizable columns
+* Remove configuration item
+* Edit configuraiton item values
+* Description field
 
 ## Contact
 
