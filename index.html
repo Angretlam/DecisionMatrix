@@ -10,12 +10,15 @@
 	<title>Decision Matrix Generator</title>
 
 	<!-- Bootstrap core CSS -->
-	<link href="graphics/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+	<link href="graphics/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js" 
+		integrity="sha256-A5sFbqCGJyOizVodXPQfK/nHJSoRcg+crlTG1HniIJw= sha384-zoaNaEYcENzf+gJvPEMhdkOqtfGep6wwJ4u/W6nmPmm9PGqIaeEp+dKwwY38/gwM sha512-s9HUjkRt5sfoQUZsrkZdlGcAZObw5w8jvEMwospDQvj3t3Z+x3jUgsSrBWZKX3fQioMfaDlPH4ZoxnqP5lIKnQ==" 
+		crossorigin="anonymous">
+	</script>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
 		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-		crossorigin="anonymous"></script>
+		crossorigin="anonymous">
+	</script>
 	<script>
 		$(function () {
 			$('[data-toggle="tooltip"]').tooltip()
@@ -256,7 +259,7 @@
 					}
 				}
 
-				XLSX.writeFile(wb, 'out.xlsb');
+				XLSX.writeFile(wb, 'out.xlsx');
 			}
 		</script>
 
@@ -373,9 +376,7 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
 		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
 		crossorigin="anonymous"></script>
-	<script src="graphics/js/bootstrap.bundle.min.js"
-		integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-		crossorigin="anonymous"></script>
+	<script src="graphics/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
