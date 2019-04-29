@@ -90,6 +90,8 @@
 				}
 			};
 
+			// An array of the policy tabs as they exist in V1 of the tool.
+			// JavaScript is a service.
 			var mapArray = ['configurationOne', 'configurationTwo', 'securityFirst', 'userFirst', 'operationsFirst'];
 
 			// Create the basic data insertion thingy.
@@ -118,6 +120,44 @@
 				buildTables();
 			}
 
+			// Re-Calculate the Security, User, and Operations Tables
+			function reBuildTables(configItem) {
+				
+				var changedItem = dataTable["configurationItems"]["data"][configItem];
+								
+				dataTable["securityFirst"]["data"][configItem] = (changedItem[1] >= changedItem[4]? 1 : 0);
+				dataTable["userFirst"]["data"][configItem] = (changedItem[2] >= changedItem[5]? 1 : 0);
+				dataTable["operationsFirst"]["data"][configItem] = (changedItem[3] >= changedItem[6]? 1 : 0);
+
+				// Rebuild the table data
+				buildTables();
+			}
+
+
+			// data update functionality
+			function updateCI(configItem, attributeItem) {
+				var tableElement = (configItem + '_' + attributeItem);
+				// Insert
+				dataTable["configurationItems"]["data"][configItem][attributeItem] = document.getElementById(tableElement).value;
+
+				// Rebuild the tables
+				reBuildTables(configItem);
+			}
+
+			// Remove items from the configuration
+			function removeCI(configItem) {
+				// Alter the data table
+				dataTable["configurationItems"]["data"].splice(configItem, 1);
+
+				// alter the configuration tables
+				for (dti = 0; dti < mapArray.length; dti++) {
+					dataTable[mapArray[dti]]["data"].splice(configItem, 1);
+				}
+				
+				// Rebuild the tables for display
+				buildTables();
+			}
+
 			function getAverage(dataPoints) {
 				// variables
 				var total = 0;
@@ -137,24 +177,62 @@
 			function buildTables() {
 				// Create the raw data table
 				// Insert the correct header for the data table
-				dataTable["configurationItems"]["html"] = "<table class=\"table\" id='\dataTable'\><tr><td>Decision Point</td><td>eSV</td><td>dSV</td><td>eUV</td><td>dUV</td><td>eOV</td><td>dOV</td>";
+				dataTable["configurationItems"]["html"] = "\
+					<table class=\"table\" id='\dataTable'\>\
+						<tr>\
+							<td>Decision Point</td>\
+							<td>Security Value Enabled</td>\
+							<td>UserX Value Enabled</td>\
+							<td>Operations Value Enabled</td>\
+							<td>Security Value Disabled</td>\
+							<td>UserX Value Disabled</td>\
+							<td>Operations Value Disabled</td>\
+							<td>Action</td>\
+						</tr>";
 				
 				// insert the configuration items to the data table
 				for (i = 0; i < dataTable["configurationItems"]["data"].length; i++) {
 					var ci = dataTable["configurationItems"]["data"][i]; 
-					dataTable["configurationItems"]["html"] = dataTable["configurationItems"]["html"] + '<tr><td>' + ci[0] + '</td><td>' + ci[1] + '</td><td>' + ci[2] + '</td><td>' + ci[3] + '</td><td>' + ci[4] + '</td><td>' + ci[5] + '</td><td>' + ci[6] + '</td></tr>';
+					dataTable["configurationItems"]["html"] += '<tr><td>' + ci[0] + '</td>';
+					
+					// Recycle through all the variables
+					for (ai = 1; ai < ci.length; ai++) {
+						dataTable["configurationItems"]["html"]	+=
+							 '<td>\
+								<select id="'+ i + '_' + ai +'" onchange="updateCI(\'' + i +  '\', \'' + ai + '\')">\
+									<option value="1"' + (ci[ai] == 1? ' selected': '') + '>1</option>\
+									<option value="2"' + (ci[ai] == 2? ' selected': '') + '>2</option>\
+									<option value="3"' + (ci[ai] == 3? ' selected': '') + '>3</option>\
+									<option value="4"' + (ci[ai] == 4? ' selected': '') + '>4</option>\
+									<option value="5"' + (ci[ai] == 5? ' selected': '') + '>5</option>\
+								</select>\
+							</td>';
+					}
+				
+					// close the dataTable for configurationItems
+					dataTable["configurationItems"]["html"] += 
+						'		<td>\
+									<button class="btn btn-danger" onclick="removeCI(\'' + i + '\')">Remove</button>\
+								</td>\
+							</tr>';
 				}
 
-				// close the dataTable for configurationItems
-				dataTable["configurationItems"]["html"] += "</table>";
-
+				dataTable["configurationItems"]["html"] += '</table>'
 				
 				//iterate through the map to complete the rest of the table
 				for (i=0; i < mapArray.length; i++) {
 					var selectedConfig = mapArray[i];
 
 					// Set the html for the current array
-					dataTable[selectedConfig]["html"] = "<table class=\"table\" id='\webTable'\><tr><td>Decision Point</td><td>Enabled</td><td>Security Value</td><td>User Value</td><td>Operations Value</td>";
+					dataTable[selectedConfig]["html"] = "\
+						<table class=\"table\" id='\webTable'\>\
+							<tr>\
+								<td>Decision Point</td>\
+								<td>Enabled</td>\
+								<td>Security Value</td>\
+								<td>User Value</td>\
+								<td>Operations Value</td>\
+							</tr>";
 
 					// Set the variables for this array
 					var configRows = '';

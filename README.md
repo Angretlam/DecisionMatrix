@@ -20,7 +20,6 @@ After the values are entered, you may export the final results to Excel.
 
 * Customizable columns
 * Remove configuration item
-* Edit configuraiton item values
 * Description field
 
 ## Contact
