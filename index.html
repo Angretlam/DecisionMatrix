@@ -301,7 +301,7 @@
 			}
 
 			function toExcel() {
-				// Get the HTML table and covert to a work book
+				// Get the HTML tables and covert to a work book
 				var wb = XLSX.utils.book_new();
 				var ciWS = XLSX.utils.table_to_sheet(document.getElementById('configurationItemsTable'));
 				var cOneWS = XLSX.utils.table_to_sheet(document.getElementById('configurationOneTable'));
@@ -316,7 +316,7 @@
 				XLSX.utils.book_append_sheet(wb, cUWS, "userFirst");
 				XLSX.utils.book_append_sheet(wb, cUWS, "operationsFirst");
 
-				// Update the enabled state for the spreadsheet
+				// Update the enabled state for the configuration worksheets
 				// Some variables for the column and starting row
 				var col = 'B';
 				var row = 3;
@@ -340,6 +340,23 @@
 					}
 				}
 
+				/*
+				// Update the data values for the configurationItems ws
+				// Variables for navigation
+				var colArray = ['B', 'C', 'D', 'E', 'F', 'G'];
+				var row = 2;
+				ws = wb.Sheets["configurationItems"];
+
+				// for each subconfiguration item in the data table
+				for (sci = 0; sci < dataTable["configurationItems"]["data"].length; sci++) {
+
+					// Iterate through each column and update the value
+					for (sciv = 0; sciv < colArray.length; sciv++) {
+						ws[(sciv + row)] 
+					}
+				}
+				*/
+				
 				XLSX.writeFile(wb, 'out.xlsx');
 			}
 		</script>
