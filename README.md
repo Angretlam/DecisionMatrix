@@ -19,8 +19,6 @@ After the values are entered, you may export the final results to Excel.
 ## Upcoming features
 
 * Customizable columns
-* Remove configuration item
-* Description field
 
 ## Contact
 

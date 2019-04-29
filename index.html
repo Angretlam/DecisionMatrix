@@ -100,6 +100,7 @@
 				// Always assume that the first value is enabled
 				var nuCI = [
 					document.getElementById('ci').value,
+					document.getElementById('description').value,
 					document.getElementById('eSV').value,
 					document.getElementById('eUV').value,
 					document.getElementById('eOV').value,
@@ -112,9 +113,9 @@
 				dataTable["configurationItems"]["data"].push(nuCI);
 				dataTable["configurationOne"]["data"].push('1');
 				dataTable["configurationTwo"]["data"].push('1');
-				dataTable["securityFirst"]["data"].push(nuCI[1] >= nuCI[4]? 1 : 0);
-				dataTable["userFirst"]["data"].push(nuCI[2] >= nuCI[5]? 1 : 0);
-				dataTable["operationsFirst"]["data"].push(nuCI[3] >= nuCI[6]? 1 : 0);
+				dataTable["securityFirst"]["data"].push(nuCI[2] >= nuCI[5]? 1 : 0);
+				dataTable["userFirst"]["data"].push(nuCI[3] >= nuCI[6]? 1 : 0);
+				dataTable["operationsFirst"]["data"].push(nuCI[4] >= nuCI[7]? 1 : 0);
 
 				// Rebuild the table data
 				buildTables();
@@ -125,9 +126,9 @@
 				
 				var changedItem = dataTable["configurationItems"]["data"][configItem];
 								
-				dataTable["securityFirst"]["data"][configItem] = (changedItem[1] >= changedItem[4]? 1 : 0);
-				dataTable["userFirst"]["data"][configItem] = (changedItem[2] >= changedItem[5]? 1 : 0);
-				dataTable["operationsFirst"]["data"][configItem] = (changedItem[3] >= changedItem[6]? 1 : 0);
+				dataTable["securityFirst"]["data"][configItem] = (changedItem[2] >= changedItem[5]? 1 : 0);
+				dataTable["userFirst"]["data"][configItem] = (changedItem[3] >= changedItem[6]? 1 : 0);
+				dataTable["operationsFirst"]["data"][configItem] = (changedItem[4] >= changedItem[7]? 1 : 0);
 
 				// Rebuild the table data
 				buildTables();
@@ -178,7 +179,7 @@
 				// Create the raw data table
 				// Insert the correct header for the data table
 				dataTable["configurationItems"]["html"] = "\
-					<table class=\"table\" id='\dataTable'\>\
+					<table class=\"table table-striped\" id='\dataTable'\>\
 						<tr>\
 							<td>Decision Point</td>\
 							<td>Security Value Enabled</td>\
@@ -193,10 +194,12 @@
 				// insert the configuration items to the data table
 				for (i = 0; i < dataTable["configurationItems"]["data"].length; i++) {
 					var ci = dataTable["configurationItems"]["data"][i]; 
-					dataTable["configurationItems"]["html"] += '<tr><td>' + ci[0] + '</td>';
+					dataTable["configurationItems"]["html"] += '<tr><td data-toggle="tooltip" data-placement="top"\
+																 title="' + ci[1] + '">'
+																  + ci[0] + '</td>';
 					
 					// Recycle through all the variables
-					for (ai = 1; ai < ci.length; ai++) {
+					for (ai = 2; ai < ci.length; ai++) {
 						dataTable["configurationItems"]["html"]	+=
 							 '<td>\
 								<select id="'+ i + '_' + ai +'" onchange="updateCI(\'' + i +  '\', \'' + ai + '\')">\
@@ -225,7 +228,7 @@
 
 					// Set the html for the current array
 					dataTable[selectedConfig]["html"] = "\
-						<table class=\"table\" id='\webTable'\>\
+						<table class=\"table table-striped\" id='\webTable'\>\
 							<tr>\
 								<td>Decision Point</td>\
 								<td>Enabled</td>\
@@ -248,16 +251,16 @@
 
 						// If enabled, create a row with the enabled values and update the score arrays
 						if (configSetting == 1) {
-							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1" selected>Enabled</option><option value="0">Disabled</option></select></td><td>' + configurationItem[1] + '</td><td>' + configurationItem[2] + '</td><td>' + configurationItem[3] + '</td></tr>';
-							SV.push(configurationItem[1]);
-							UV.push(configurationItem[2]);
-							OV.push(configurationItem[3]);
+							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1" selected>Enabled</option><option value="0">Disabled</option></select></td><td>' + configurationItem[2] + '</td><td>' + configurationItem[3] + '</td><td>' + configurationItem[4] + '</td></tr>';
+							SV.push(configurationItem[2]);
+							UV.push(configurationItem[3]);
+							OV.push(configurationItem[4]);
 							// if disabled, create a row with the disabled values
 						} else {
-							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1">Enabled</option><option value="0" selected>Disabled</option></select></td><td>' + configurationItem[4] + '</td><td>' + configurationItem[5] + '</td><td>' + configurationItem[6] + '</td></tr>';
-							SV.push(configurationItem[4]);
-							UV.push(configurationItem[5]);
-							OV.push(configurationItem[6]);
+							configRows += '<tr><td>' + configurationItem[0] + '</td><td><select id="' + selectedConfig + '_' + s + '" onChange="toggleCI(\'' + s + '\', \'' + selectedConfig + '\')"><option value="1">Enabled</option><option value="0" selected>Disabled</option></select></td><td>' + configurationItem[5] + '</td><td>' + configurationItem[6] + '</td><td>' + configurationItem[7] + '</td></tr>';
+							SV.push(configurationItem[5]);
+							UV.push(configurationItem[6]);
+							OV.push(configurationItem[7]);
 						}
 					}
 				
@@ -342,36 +345,43 @@
 		</script>
 
 		<!-- Create the input table -->
-		<table class="table">
+		<table class="table table-bordered">
 			<tr>
 				<td data-toggle="tooltip" data-placement="top" title="Add a new configuration item">
 					Add
 				</td>
+				<td>
+					<input id="submit" type="submit" class="btn btn-outline-success" value="+" onClick="addCI()">
+				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Policy, configuration, or decision point.">
 					Decision Point
 				</td>
-				<td data-toggle="tooltip" data-placement="top" title="Security value if enabled.">
-					Security Value enabled 
+				<td>
+					<input id="ci" type="text" name="ci" value=""></input>
+				</td>
+				<td data-toggle="tooltip" data-placement="top" title="Binary states for decisions.">
+					State 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="User value if enabled.">
-					UserX Value enabled 
+					Security Value 
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Operations value if enabled.">
-					Operations Value enabled 
+					User Value
 				</td>
 				<td data-toggle="tooltip" data-placement="top" title="Security value if disabled.">
-					Security Value disabled 
-				</td>
-				<td data-toggle="tooltip" data-placement="top" title="User value if disabled.">
-					UserX Value disabled 
-				</td>
-				<td data-toggle="tooltip" data-placement="top" title="Operations value if disabled.">
-					Operations Value disabled 
+					Operations Value
 				</td>
 			</tr>
 			<tr>
-				<td><input id="submit" type="submit" class="btn btn-outline-success" value="+" onClick="addCI()"></td>
-				<td><input id="ci" type="text" name="ci" value=""></input></td>
+				<td data-toggle="tooltip" data-placement="top" title="Optional description field." rowspan="2">
+					Description
+				</td>
+				<td colspan="3" rowspan="2">
+					<textarea class="form-control" id="description" rows="3"></textarea>
+				</td>
+				<td>
+					Enabled
+				</td>
 				<td>
 					<select id="eSV" name="eSV">
 						<option value="1">1</option>
@@ -398,6 +408,11 @@
 						<option value="4">4</option>
 						<option value="5">5</option>
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Disabled
 				</td>
 				<td>
 					<select id="dSV" name="dSV">
